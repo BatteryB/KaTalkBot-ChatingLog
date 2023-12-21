@@ -23,7 +23,7 @@ function responseFix(room, msg, sender, isGroupChat, replier, imageDB, packageNa
         }
 
         if (msg == prefix + '채팅 기록') {
-            let cursor = sql.query('SELECT * FROM CHATLOG');
+            let cursor = sql.query('SELECT * FROM CHATLOG WHERE ROOM = "' + room + '"');
             cursor.moveToFirst();
             let result = [], chatLog = [];
             index = 0;
