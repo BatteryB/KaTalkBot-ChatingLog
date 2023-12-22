@@ -6,51 +6,63 @@ let index = 0;
 let prefix = '!'; // 접두사 수정 선택 / Select Modifying Prefix
 
 function responseFix(room, msg, sender, isGroupChat, replier, imageDB, packageName) {
-    if (NoonWhether()) {
-        sql.query('DELETE FROM CHATLOG');
-    }
 
-    if (room == 'yout room name') { // 채팅방 이름 수정 필수 / Modifying chat room name is required
+    if (room == 'yout room name') { // 채팅방 이름 수정 필수/ Modifying chat room name is required
         if (sender != 'your bot name') { // 봇 이름 수정 필수 / Bot Name Modification Required
             let nowTime = TimeNow();
-            sql.query('INSERT INTO CHATLOG VALUES("' + room + '", "' + nowTime[0] + '", ' + nowTime[1] + ', ' + nowTime[2] + ', "' + sender + '", "' + msg + '")');
+            sql.query('INSERT INTO CHATLOG VALUES("' + room + '", ' + nowTime.month + ', ' + nowTime.day + ', "' + nowTime.meridiem + '", ' + nowTime.hours + ', ' + nowTime.minutes + ', "' + sender + '", "' + msg + '")');
 
             if (findUser(sender)) {
                 sql.query('UPDATE USERCHAT SET CHATINGNUM = CHATINGNUM + 1 WHERE NAME = "' + sender + '"');
             } else {
                 sql.query('INSERT INTO USERCHAT VALUES("' + sender + '", 1)');
             }
+
         }
 
         if (msg == prefix + '채팅 기록') {
-            let cursor = sql.query('SELECT * FROM CHATLOG');
+            let monthDay = sql.query('SELECT MONTH, DAY FROM CHATLOG');
+            monthDay.moveToFirst();
+            let now = new Date();
+            let nowDay = now.getDate();
+            let nowMonth = now.getMonth() + 1;
+            let date = {
+                month: monthDay.getInt(0),
+                day: monthDay.getInt(1)
+            };
+
+            if (date.day < Number(nowDay)) {
+                sql.query('DELETE FROM CHATLOG WHERE DAY < "' + nowDay + '"');
+            } else if (date.month < Number(nowMonth)) {
+                sql.query('DELETE FROM CHATLOG WHERE MONTH < "' + nowMonth + '"');
+            }
+
+            let cursor = sql.query('SELECT TIME, HOUR, MINUTES, NAME, DETAIL FROM CHATLOG WHERE ROOM = "' + room + '"');
             cursor.moveToFirst();
             let result = [], chatLog = [];
             index = 0;
 
             result[index] = {
-                r: cursor.getString(0),
-                t: cursor.getString(1),
-                h: cursor.getInt(2),
-                m: cursor.getInt(3),
-                n: cursor.getString(4),
-                d: cursor.getString(5)
+                t: cursor.getString(0),
+                h: cursor.getInt(1),
+                m: cursor.getInt(2),
+                n: cursor.getString(3),
+                d: cursor.getString(4)
             };
             chatLog[index] = String(result[index].t) + ' ' + Number(result[index].h) + '시 ' + Number(result[index].m) + '분 | ' + String(result[index].n) + ' : ' + String(result[index].d);
 
             while (cursor.moveToNext()) {
                 index++;
                 result[index] = {
-                    r: cursor.getString(0),
-                    t: cursor.getString(1),
-                    h: cursor.getInt(2),
-                    m: cursor.getInt(3),
-                    n: cursor.getString(4),
-                    d: cursor.getString(5)
+                    t: cursor.getString(0),
+                    h: cursor.getInt(1),
+                    m: cursor.getInt(2),
+                    n: cursor.getString(3),
+                    d: cursor.getString(4)
                 };
                 chatLog[index] = String(result[index].t) + ' ' + Number(result[index].h) + '시 ' + Number(result[index].m) + '분 | ' + String(result[index].n) + ' : ' + String(result[index].d);
             }
-            let log = '채팅로그​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​\n\n*모든 채팅기록은 매일 밤 11시 59분에 삭제됩니다.\n==========\n';
+            let log = '채팅로그​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​\n\n*모든 채팅기록은 매일 밤 11시 59분에 삭제됩니다.\n\n=====' + nowMonth + '월 ' + nowDay + '일=====\n\n';
             log += chatLog.join('\n');
             replier.reply(log);
         }
@@ -71,27 +83,30 @@ function responseFix(room, msg, sender, isGroupChat, replier, imageDB, packageNa
             let user = [], rank = [], rankNum = 1;
             index = 0;
 
-            index++;
-            user[index] = {
-                n: rankCursor.getString(0),
-                d: rankCursor.getInt(1)
-            };
-            rank[index] = rankNum + '위 ' + user[index].n + ' | ' + user[index].d + '회';
-            rankNum++;
-
-            while (rankCursor.moveToNext()) {
-                index++;
+            try {
                 user[index] = {
                     n: rankCursor.getString(0),
                     d: rankCursor.getInt(1)
                 };
                 rank[index] = rankNum + '위 ' + user[index].n + ' | ' + user[index].d + '회';
                 rankNum++;
-            }
 
-            let rankResult = '채팅순위 top' + topNum + '​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​\n';
-            rankResult += rank.join('\n');
-            replier.reply(rankResult);
+                while (rankCursor.moveToNext()) {
+                    index++;
+                    user[index] = {
+                        n: rankCursor.getString(0),
+                        d: rankCursor.getInt(1)
+                    };
+                    rank[index] = rankNum + '위 ' + user[index].n + ' | ' + user[index].d + '회';
+                    rankNum++;
+                }
+
+                let rankResult = '채팅순위 top' + topNum + '​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​​\n';
+                rankResult += rank.join('\n');
+                replier.reply(rankResult);
+            } catch (e) {
+                replier.reply('오류가 발생했습니다.');
+            }
         }
 
         if (msg == '>기록삭제') {
@@ -99,13 +114,16 @@ function responseFix(room, msg, sender, isGroupChat, replier, imageDB, packageNa
         }
 
         if (msg == '>순위삭제') {
-            sql.query('DLETE FROM USERCHAT');
+            sql.query('DELETE FROM USERCHAT');
         }
     }
 }
 
 function TimeNow() {
     let now = new Date();
+
+    let month = now.getMonth() + 1;
+    let date = now.getDate();
 
     let hours = now.getHours();
     let minutes = now.getMinutes();
@@ -115,22 +133,17 @@ function TimeNow() {
     hours = hours % 12;
     hours = hours === 0 ? 12 : hours;
 
-    let time = [String(meridiem), Number(hours), Number(minutes)];
+    let time = {
+        month: Number(month),
+        day: Number(date),
+        meridiem: String(meridiem),
+        hours: Number(hours),
+        minutes: Number(minutes)
+    };
 
     return time;
 }
 
-function NoonWhether() {
-    var currentDate = new Date();
-    var targetTime = new Date();
-    targetTime.setHours(23, 59, 59, 700);
-
-    if (currentDate.getTime() < targetTime.getTime()) {
-        return false;
-    } else {
-        return true;
-    }
-}
 
 function findUser(sender) {
     let find = sql.query('SELECT NAME FROM USERCHAT WHERE NAME = "' + sender + '"');
