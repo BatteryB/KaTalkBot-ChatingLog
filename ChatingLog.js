@@ -31,12 +31,9 @@ function responseFix(room, msg, sender, isGroupChat, replier, imageDB, packageNa
                 day: monthDay.getInt(1)
             };
 
-            if (date.day < Number(nowDay)) {
+            if (date.day < Number(nowDay) || date.month < Number(nowMonth)) {
                 sql.query('DELETE FROM CHATLOG WHERE DAY < "' + nowDay + '"');
-            } else if (date.month < Number(nowMonth)) {
-                sql.query('DELETE FROM CHATLOG WHERE MONTH < "' + nowMonth + '"');
             }
-
             let cursor = sql.query('SELECT TIME, HOUR, MINUTES, NAME, DETAIL FROM CHATLOG WHERE ROOM = "' + room + '"');
             cursor.moveToFirst();
             let result = [], chatLog = [];
